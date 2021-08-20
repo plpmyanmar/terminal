@@ -88,6 +88,9 @@ namespace Microsoft::Console::Render
         [[nodiscard]] static HRESULT STDMETHODCALLTYPE s_CalculateBoxEffect(IDWriteTextFormat* format, size_t widthPixels, IDWriteFontFace1* face, float fontScale, IBoxDrawingEffect** effect) noexcept;
 
         bool DidUserSetFeatures() const noexcept;
+        bool DidUserSetAxes() const noexcept;
+        void UseUserWeight(bool useUserWeight) noexcept;
+        bool DidUserSetItalic() const noexcept;
 
         std::vector<DWRITE_FONT_AXIS_VALUE> GetAxisVector(const DWRITE_FONT_WEIGHT fontWeight,
                                                           const DWRITE_FONT_STRETCH fontStretch,
@@ -97,7 +100,9 @@ namespace Microsoft::Console::Render
     private:
         using FontAttributeMapKey = uint32_t;
 
+        bool _useUserWeight{ true };
         bool _didUserSetFeatures{ false };
+        bool _didUserSetAxes{ false };
         // The font features to apply to the text
         std::vector<DWRITE_FONT_FEATURE> _featureVector;
 

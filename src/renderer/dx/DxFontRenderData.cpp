@@ -458,6 +458,44 @@ bool DxFontRenderData::DidUserSetFeatures() const noexcept
 }
 
 // Routine Description:
+// - Returns whether the user set or updated any of the font axes to be applied
+bool DxFontRenderData::DidUserSetAxes() const noexcept
+{
+    return _didUserSetAxes;
+}
+
+// Routine Description:
+// - Function called to inform us whether to use the user set weight
+//   in the font axes
+// - Called by CustomTextLayout, when the text attribute is bold we should
+//   ignore the user set weight, otherwise setting the bold font axis
+//   breaks the bold font attribute
+// Arguments:
+// - useUserWeight: boolean that tells us if we should use the user set weight
+//   in the font axes
+void DxFontRenderData::UseUserWeight(bool useUserWeight) noexcept
+{
+    _useUserWeight = useUserWeight;
+}
+
+// Routine Description:
+// - Returns whether the set italic in the font axes
+// Return Value:
+// - True if the user set the italic axis to 1,
+//   false if the italic axis is not present or the italic axis is set to 0
+bool DxFontRenderData::DidUserSetItalic() const noexcept
+{
+    for (const auto& axisVal : _axesVector)
+    {
+        if (axisVal.axisTag == DWRITE_FONT_AXIS_TAG_ITALIC && axisVal.value == 1)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+// Routine Description:
 // - Updates our internal map of font features with the given features
 // - NOTE TO CALLER: Make sure to call _BuildFontRenderData after calling this for the feature changes
 //   to take place
@@ -509,14 +547,18 @@ void DxFontRenderData::_SetAxes(const std::unordered_map<std::wstring_view, floa
     _axesVector.clear();
 
     // Update our axis map with the provided axes
-#pragma warning(suppress : 26445) // the analyzer doesn't like reference to string_view
-    for (const auto& [axis, value] : axes)
+    if (!axes.empty())
     {
-        if (axis.length() == TAG_LENGTH)
+#pragma warning(suppress : 26445) // the analyzer doesn't like reference to string_view
+        for (const auto& [axis, value] : axes)
         {
-            const auto dwriteTag = DWRITE_MAKE_FONT_AXIS_TAG(til::at(axis, 0), til::at(axis, 1), til::at(axis, 2), til::at(axis, 3));
-            _axesVector.emplace_back(DWRITE_FONT_AXIS_VALUE{ dwriteTag, value });
+            if (axis.length() == TAG_LENGTH)
+            {
+                const auto dwriteTag = DWRITE_MAKE_FONT_AXIS_TAG(til::at(axis, 0), til::at(axis, 1), til::at(axis, 2), til::at(axis, 3));
+                _axesVector.emplace_back(DWRITE_FONT_AXIS_VALUE{ dwriteTag, value });
+            }
         }
+        _didUserSetAxes = true;
     }
 }
 
@@ -845,8 +887,29 @@ Microsoft::WRL::ComPtr<IDWriteTextFormat> DxFontRenderData::_BuildTextFormat(con
     ::Microsoft::WRL::ComPtr<IDWriteTextFormat3> format3;
     if (!_axesVector.empty() && !FAILED(format->QueryInterface(IID_PPV_ARGS(&format3))))
     {
+        std::optional<float> oldWeight;
+        if (!_useUserWeight)
+        {
+            // Remove the user set weight if we were told not to use it
+            // This is quite awkward, we don't want to permanently delete the weight axis from our _axesVector,
+            // we only want to delete it from the list we are about to pass into the text format
+            for (auto iter = _axesVector.begin(); iter != _axesVector.end(); ++iter)
+            {
+                if (iter->axisTag == DWRITE_FONT_AXIS_TAG_WEIGHT)
+                {
+                    oldWeight = iter->value;
+                    _axesVector.erase(iter);
+                    break;
+                }
+            }
+        }
         DWRITE_FONT_AXIS_VALUE const* axesList = _axesVector.data();
         format3->SetFontAxisValues(axesList, gsl::narrow<uint32_t>(_axesVector.size()));
+        // If we removed the user weight, make sure to put it back
+        if (oldWeight)
+        {
+            _axesVector.emplace_back(DWRITE_FONT_AXIS_VALUE{ DWRITE_FONT_AXIS_TAG_WEIGHT, oldWeight.value() });
+        }
     }
 
     return format;
