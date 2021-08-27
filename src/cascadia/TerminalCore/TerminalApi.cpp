@@ -16,7 +16,7 @@ try
     _WriteBuffer(stringView);
     return true;
 }
-CATCH_LOG_RETURN_FALSE()
+CATCH_RETURN_FALSE()
 
 bool Terminal::ExecuteChar(wchar_t wch) noexcept
 try
@@ -24,7 +24,7 @@ try
     _WriteBuffer({ &wch, 1 });
     return true;
 }
-CATCH_LOG_RETURN_FALSE()
+CATCH_RETURN_FALSE()
 
 bool Terminal::ReturnResponse(std::wstring_view responseString) noexcept
 try
@@ -66,7 +66,7 @@ try
 
     return true;
 }
-CATCH_LOG_RETURN_FALSE()
+CATCH_RETURN_FALSE()
 
 COORD Terminal::GetCursorPosition() noexcept
 {
@@ -87,7 +87,7 @@ try
     _buffer->GetCursor().SetColor(color);
     return true;
 }
-CATCH_LOG_RETURN_FALSE()
+CATCH_RETURN_FALSE()
 
 // Method Description:
 // - Moves the cursor down one line, and possibly also to the leftmost column.
@@ -113,7 +113,7 @@ try
 
     return true;
 }
-CATCH_LOG_RETURN_FALSE()
+CATCH_RETURN_FALSE()
 
 // Method Description:
 // - deletes count characters starting from the cursor's current position
@@ -162,7 +162,7 @@ try
 
     return true;
 }
-CATCH_LOG_RETURN_FALSE()
+CATCH_RETURN_FALSE()
 
 // Method Description:
 // - Inserts count spaces starting from the cursor's current position, moving over the existing text
@@ -217,7 +217,7 @@ try
 
     return true;
 }
-CATCH_LOG_RETURN_FALSE()
+CATCH_RETURN_FALSE()
 
 bool Terminal::EraseCharacters(const size_t numChars) noexcept
 try
@@ -230,7 +230,7 @@ try
     _buffer->Write(eraseIter, absoluteCursorPos);
     return true;
 }
-CATCH_LOG_RETURN_FALSE()
+CATCH_RETURN_FALSE()
 
 // Method description:
 // - erases a line of text, either from
@@ -276,7 +276,7 @@ try
     _buffer->Write(eraseIter, startPos, false);
     return true;
 }
-CATCH_LOG_RETURN_FALSE()
+CATCH_RETURN_FALSE()
 
 // Method description:
 // - erases text in the buffer in two ways depending on erase type
@@ -360,7 +360,7 @@ try
 
     return true;
 }
-CATCH_LOG_RETURN_FALSE()
+CATCH_RETURN_FALSE()
 
 bool Terminal::WarningBell() noexcept
 try
@@ -368,7 +368,7 @@ try
     _pfnWarningBell();
     return true;
 }
-CATCH_LOG_RETURN_FALSE()
+CATCH_RETURN_FALSE()
 
 bool Terminal::SetWindowTitle(std::wstring_view title) noexcept
 try
@@ -380,7 +380,7 @@ try
     }
     return true;
 }
-CATCH_LOG_RETURN_FALSE()
+CATCH_RETURN_FALSE()
 
 // Method Description:
 // - Updates the value in the colortable at index tableIndex to the new color
@@ -399,7 +399,7 @@ try
     _buffer->GetRenderTarget().TriggerRedrawAll();
     return true;
 }
-CATCH_LOG_RETURN_FALSE()
+CATCH_RETURN_FALSE()
 
 // Method Description:
 // - Sets the cursor style to the given style.
@@ -469,7 +469,7 @@ try
     _buffer->GetRenderTarget().TriggerRedrawAll();
     return true;
 }
-CATCH_LOG_RETURN_FALSE()
+CATCH_RETURN_FALSE()
 
 // Method Description:
 // - Updates the default background color from a COLORREF, format 0x00BBGGRR.
@@ -487,7 +487,7 @@ try
     _buffer->GetRenderTarget().TriggerRedrawAll();
     return true;
 }
-CATCH_LOG_RETURN_FALSE()
+CATCH_RETURN_FALSE()
 
 til::color Terminal::GetDefaultBackground() const noexcept
 {
@@ -521,7 +521,7 @@ try
     _buffer->GetRenderTarget().TriggerRedrawAll();
     return true;
 }
-CATCH_LOG_RETURN_FALSE()
+CATCH_RETURN_FALSE()
 
 bool Terminal::EnableVT200MouseMode(const bool enabled) noexcept
 {
@@ -603,7 +603,7 @@ try
 
     return true;
 }
-CATCH_LOG_RETURN_FALSE()
+CATCH_RETURN_FALSE()
 
 // Method Description:
 // - Updates the buffer's current text attributes to start a hyperlink
